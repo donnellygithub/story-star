@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Star — Social Story Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e8f4fd;
+    --sun: #FFD166;
+    --coral: #FF6B6B;
+    --mint: #06D6A0;
+    --plum: #7B2D8B;
+    --lavender: #C8A8E9;
+    --cloud: #ffffff;
+    --ink: #2d2d2d;
+    --soft: #f7f3ff;
+    --border: #e2d9f3;
+    --shadow: rgba(123,45,139,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--sky);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--plum);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+  .logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo span { font-size: 1.6rem; }
+  .header-btns { display: flex; gap: 10px; }
+  .btn {
+    padding: 9px 20px;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
+  .btn:active { transform: translateY(0); }
+  .btn-sun { background: var(--sun); color: var(--plum); }
+  .btn-mint { background: var(--mint); color: white; }
+  .btn-coral { background: var(--coral); color: white; }
+  .btn-plum { background: var(--plum); color: white; }
+  .btn-ghost { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.5); }
+  .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+
+  /* MAIN LAYOUT */
+  .app { display: flex; height: calc(100vh - 62px); }
+
+  /* LEFT PANEL */
+  .left-panel {
+    width: 280px;
+    background: white;
+    border-right: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+  }
+  .panel-tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: #999;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .panel-tab.active { color: var(--plum); border-bottom-color: var(--plum); }
+  .panel-content { flex: 1; overflow-y: auto; padding: 14px; }
+
+  /* TEMPLATES */
+  .template-card {
+    background: var(--soft);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .template-card:hover { border-color: var(--plum); background: #f0e8ff; transform: translateX(3px); }
+  .template-icon { font-size: 1.8rem; margin-bottom: 4px; }
+  .template-title { font-weight: 800; font-size: 0.88rem; color: var(--plum); }
+  .template-desc { font-size: 0.75rem; color: #777; margin-top: 2px; }
+
+  /* EMOJI PICKER */
+  .emoji-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .emoji-btn {
+    font-size: 1.6rem;
+    background: var(--soft);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .emoji-btn:hover { background: #f0e8ff; border-color: var(--plum); transform: scale(1.1); }
+
+  /* COLORS */
+  .color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .color-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    cursor: pointer; border: 3px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-dot:hover, .color-dot.selected { transform: scale(1.2); border-color: var(--plum); }
+
+  /* MIDDLE — STORY CANVAS */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--sky);
+  }
+  .canvas-toolbar {
+    background: white;
+    border-bottom: 2px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .story-title-input {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    border: none;
+    background: var(--soft);
+    border-radius: 10px;
+    padding: 6px 14px;
+    color: var(--plum);
+    flex: 1;
+    min-width: 150px;
+  }
+  .story-title-input:focus { outline: 2px solid var(--lavender); }
+
+  /* PAGES STRIP */
+  .pages-strip {
+    background: white;
+    border-top: 2px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    align-items: center;
+    min-height: 110px;
+  }
+  .page-thumb {
+    width: 80px; height: 80px; flex-shrink: 0;
+    border-radius: 12px;
+    border: 3px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #aaa;
+    background: var(--soft);
+    transition: all 0.2s;
+    overflow: hidden;
+    position: relative;
+  }
+  .page-thumb.active { border-color: var(--plum); box-shadow: 0 0 0 3px var(--lavender); }
+  .page-thumb:hover { border-color: var(--plum); }
+  .page-thumb .thumb-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+  .page-thumb .thumb-label { position: absolute; bottom: 4px; font-size: 0.6rem; color: #555; font-weight: 800; text-align: center; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+  .page-thumb .page-num { position: absolute; top: 3px; left: 5px; font-size: 0.6rem; color: white; background: var(--plum); border-radius: 20px; padding: 1px 5px; }
+  .add-page-btn {
+    width: 80px; height: 80px; flex-shrink: 0;
+    border-radius: 12px;
+    border: 3px dashed var(--lavender);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--lavender);
+    background: transparent;
+    transition: all 0.2s;
+  }
+  .add-page-btn:hover { border-color: var(--plum); color: var(--plum); background: var(--soft); }
+
+  /* PAGE EDITOR */
+  .page-editor {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .story-page {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 8px 40px var(--shadow);
+    width: 100%;
+    max-width: 520px;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .page-image-area {
+    width: 100%;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .page-image-area:hover .img-overlay { opacity: 1; }
+  .img-overlay {
+    position: absolute; inset: 0;
+    background: rgba(123,45,139,0.35);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s;
+    font-weight: 800; color: white; font-size: 0.9rem;
+    gap: 8px; flex-direction: column;
+  }
+  .img-overlay .overlay-icon { font-size: 2rem; }
+  .page-emoji-display { font-size: 6rem; user-select: none; }
+  .page-text-area {
+    padding: 20px 24px;
+    flex: 1;
+  }
+  .page-text-input {
+    width: 100%;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    min-height: 80px;
+    line-height: 1.6;
+    background: transparent;
+  }
+  .page-text-input::placeholder { color: #ccc; }
+  .page-controls {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-bg-preview {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: inline-block; border: 2px solid var(--border);
+    vertical-align: middle; margin-right: 4px;
+  }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    width: 220px;
+    background: white;
+    border-left: 2px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .r-section-title {
+    font-weight: 900;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--plum);
+    margin-bottom: 8px;
+  }
+  .font-size-row { display: flex; align-items: center; gap: 8px; }
+  .font-size-row input[type=range] { flex: 1; accent-color: var(--plum); }
+  .font-size-val { font-weight: 800; color: var(--plum); font-size: 0.9rem; min-width: 30px; }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.2s;
+  }
+  .modal {
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.25s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal h2 { font-family: 'Fredoka One', cursive; color: var(--plum); font-size: 1.5rem; margin-bottom: 16px; }
+  .modal-close { float: right; font-size: 1.4rem; cursor: pointer; color: #aaa; background: none; border: none; font-family: inherit; }
+
+  /* PREVIEW / SLIDESHOW */
+  .preview-modal .modal { max-width: 600px; padding: 0; overflow: hidden; }
+  .slideshow-page {
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    gap: 20px;
+  }
+  .slideshow-emoji { font-size: 8rem; }
+  .slideshow-text { font-size: 1.4rem; font-weight: 800; line-height: 1.6; color: var(--ink); }
+  .slideshow-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    border-top: 2px solid var(--border);
+    background: var(--soft);
+  }
+  .slide-nav-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    font-size: 1.2rem; cursor: pointer;
+    border: 2px solid var(--border); background: white;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .slide-nav-btn:hover { background: var(--plum); color: white; border-color: var(--plum); }
+  .slide-nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .slide-counter { font-weight: 800; color: var(--plum); }
+
+  /* TTS */
+  .tts-bar {
+    background: var(--plum);
+    color: white;
+    padding: 8px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 0.85rem;
+  }
+  .tts-btn {
+    background: var(--sun); color: var(--plum);
+    border: none; border-radius: 50px;
+    padding: 5px 14px; font-family: 'Nunito'; font-weight: 800;
+    cursor: pointer; font-size: 0.8rem;
+  }
+
+  /* STORIES LIST */
+  .story-card {
+    background: var(--soft);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .story-card:hover { border-color: var(--plum); transform: translateY(-2px); }
+  .story-card-icon { font-size: 2.2rem; }
+  .story-card-info { flex: 1; }
+  .story-card-title { font-weight: 800; color: var(--plum); }
+  .story-card-meta { font-size: 0.75rem; color: #999; margin-top: 2px; }
+
+  /* FILE INPUT */
+  input[type=file] { display: none; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--plum); color: white;
+    padding: 12px 24px; border-radius: 50px;
+    font-weight: 800; font-size: 0.9rem;
+    z-index: 999; animation: slideUp 0.3s;
+    box-shadow: 0 6px 20px var(--shadow);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    color: #bbb; padding: 40px;
+  }
+  .empty-state .empty-icon { font-size: 4rem; }
+  .empty-state p { font-weight: 700; font-size: 0.9rem; text-align: center; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--lavender); border-radius: 10px; }
+
+  /* VIEW SWITCHER */
+  .view-home { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; }
+  .home-logo { font-family: 'Fredoka One', cursive; font-size: 3rem; color: var(--plum); margin-bottom: 8px; }
+  .home-sub { color: #888; font-weight: 700; margin-bottom: 36px; font-size: 1rem; }
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 500px; margin-bottom: 32px; }
+  .home-action {
+    background: white; border: 3px solid var(--border); border-radius: 20px;
+    padding: 24px 16px; text-align: center; cursor: pointer;
+    transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .home-action:hover { border-color: var(--plum); background: var(--soft); transform: translateY(-3px); box-shadow: 0 8px 24px var(--shadow); }
+  .home-action-icon { font-size: 2.4rem; }
+  .home-action-label { font-weight: 800; font-size: 0.9rem; color: var(--plum); }
+  .home-action-desc { font-size: 0.75rem; color: #999; }
+
+  .tag { display: inline-block; background: var(--lavender); color: var(--plum); border-radius: 50px; padding: 2px 10px; font-size: 0.72rem; font-weight: 800; margin-right: 4px; }
+
+  .sep { height: 1px; background: var(--border); margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>⭐</span> Story Star</div>
+  <div class="header-btns">
+    <button class="btn btn-ghost" onclick="showHome()">🏠 Home</button>
+    <button class="btn btn-sun" onclick="openPreview()">▶ Preview</button>
+    <button class="btn btn-mint" onclick="saveStory()">💾 Save</button>
+  </div>
+</header>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="view-home" style="display:none;">
+  <div class="home-logo">⭐ Story Star</div>
+  <div class="home-sub">Create visual social stories for your child</div>
+  <div class="home-grid">
+    <div class="home-action" onclick="newStory()">
+      <div class="home-action-icon">✨</div>
+      <div class="home-action-label">New Story</div>
+      <div class="home-action-desc">Start from scratch</div>
+    </div>
+    <div class="home-action" onclick="showTemplates()">
+      <div class="home-action-icon">📋</div>
+      <div class="home-action-label">Use Template</div>
+      <div class="home-action-desc">Ready-made stories</div>
+    </div>
+    <div class="home-action" onclick="showMyStories()">
+      <div class="home-action-icon">📚</div>
+      <div class="home-action-label">My Stories</div>
+      <div class="home-action-desc">Open saved stories</div>
+    </div>
+    <div class="home-action" onclick="newStory(); setTimeout(openPreview,300)">
+      <div class="home-action-icon">🎭</div>
+      <div class="home-action-label">Read a Story</div>
+      <div class="home-action-desc">Slideshow mode</div>
+    </div>
+  </div>
+  <div id="savedStoriesList" style="width:100%;max-width:500px;"></div>
+</div>
+
+<!-- EDITOR -->
+<div id="editorScreen" class="app" style="display:none;">
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="switchTab(this,'templates')">📋 Templates</div>
+      <div class="panel-tab" onclick="switchTab(this,'images')">🖼 Images</div>
+      <div class="panel-tab" onclick="switchTab(this,'colors')">🎨 Colors</div>
+    </div>
+    <div class="panel-content" id="tabTemplates">
+      <div style="font-weight:800;font-size:0.78rem;color:#999;margin-bottom:10px;">STORY TEMPLATES</div>
+      <div class="template-card" onclick="loadTemplate('haircut')">
+        <div class="template-icon">✂️</div>
+        <div class="template-title">Getting a Haircut</div>
+        <div class="template-desc">Prepare for the salon visit</div>
+      </div>
+      <div class="template-card" onclick="loadTemplate('doctor')">
+        <div class="template-icon">🏥</div>
+        <div class="template-title">Going to the Doctor</div>
+        <div class="template-desc">What to expect at the clinic</div>
+      </div>
+      <div class="template-card" onclick="loadTemplate('shopping')">
+        <div class="template-icon">🛒</div>
+        <div class="template-title">Food Shopping</div>
+        <div class="template-desc">A trip to the supermarket</div>
+      </div>
+      <div class="template-card" onclick="loadTemplate('school')">
+        <div class="template-icon">🏫</div>
+        <div class="template-title">First Day at School</div>
+        <div class="template-desc">Starting a new school</div>
+      </div>
+      <div class="template-card" onclick="loadTemplate('dentist')">
+        <div class="template-icon">🦷</div>
+        <div class="template-title">Visiting the Dentist</div>
+        <div class="template-desc">Tooth check-up steps</div>
+      </div>
+      <div class="template-card" onclick="loadTemplate('bus')">
+        <div class="template-icon">🚌</div>
+        <div class="template-title">Taking the Bus</div>
+        <div class="template-desc">Using public transport</div>
+      </div>
+      <div class="template-card" onclick="loadTemplate('bedtime')">
+        <div class="template-icon">🌙</div>
+        <div class="template-title">Bedtime Routine</div>
+        <div class="template-desc">Wind-down steps for sleep</div>
+      </div>
+    </div>
+    <div class="panel-content" id="tabImages" style="display:none;">
+      <div style="font-weight:800;font-size:0.78rem;color:#999;margin-bottom:10px;">BUILT-IN IMAGES</div>
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+    <div class="panel-content" id="tabColors" style="display:none;">
+      <div style="font-weight:800;font-size:0.78rem;color:#999;margin-bottom:10px;">PAGE BACKGROUND</div>
+      <div class="color-row" id="colorPicker"></div>
+      <div class="sep"></div>
+      <div style="font-weight:800;font-size:0.78rem;color:#999;margin-bottom:10px;">TEXT COLOR</div>
+      <div class="color-row" id="textColorPicker"></div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area">
+    <div class="canvas-toolbar">
+      <input class="story-title-input" id="storyTitle" placeholder="My Story Title..." value="My New Story">
+      <button class="btn btn-sm btn-ghost" style="color:var(--plum);border-color:var(--border);" onclick="deleteCurrentPage()">🗑 Delete Page</button>
+      <button class="btn btn-sm btn-coral" onclick="document.getElementById('photoUpload').click()">📷 Add Photo</button>
+      <input type="file" id="photoUpload" accept="image/*" onchange="handlePhoto(event)">
+    </div>
+    <div class="page-editor">
+      <div class="story-page" id="storyPage">
+        <div class="page-image-area" id="pageImageArea" onclick="document.getElementById('photoUpload').click()">
+          <div class="page-emoji-display" id="pageEmoji">😊</div>
+          <div class="img-overlay">
+            <div class="overlay-icon">📷</div>
+            <div>Tap to change image</div>
+          </div>
+        </div>
+        <div class="page-text-area">
+          <textarea class="page-text-input" id="pageText" placeholder="Write what happens on this page..." rows="3" oninput="updateCurrentPage()"></textarea>
+        </div>
+        <div class="page-controls">
+          <div>
+            <span class="page-bg-preview" id="pageBgPreview" style="background:#FFD166;"></span>
+            <span style="font-size:0.78rem;color:#999;">Background colour</span>
+          </div>
+          <button class="btn btn-sm" style="background:var(--lavender);color:var(--plum);" onclick="speakCurrentPage()">🔊 Read Aloud</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGES STRIP -->
+    <div class="pages-strip" id="pagesStrip">
+      <div class="add-page-btn" onclick="addPage()">+<div style="font-size:0.65rem;font-weight:800;margin-top:2px;">Page</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div>
+      <div class="r-section-title">📝 Text Size</div>
+      <div class="font-size-row">
+        <span style="font-size:0.8rem;">A</span>
+        <input type="range" min="12" max="28" value="18" id="fontSizeSlider" oninput="changeFontSize(this.value)">
+        <span style="font-size:1.2rem;">A</span>
+      </div>
+      <div style="font-size:0.75rem;color:#aaa;margin-top:4px;">Size: <span id="fontSizeVal" class="font-size-val">18</span>px</div>
+    </div>
+    <div class="sep"></div>
+    <div>
+      <div class="r-section-title">🎯 Story Info</div>
+      <div style="font-size:0.8rem;color:#888;line-height:1.8;">
+        Pages: <strong id="infoPages">1</strong><br>
+        Story: <strong id="infoTitle">My New Story</strong>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div>
+      <div class="r-section-title">🔊 Read Story</div>
+      <p style="font-size:0.75rem;color:#aaa;margin-bottom:8px;">Read the whole story aloud</p>
+      <button class="btn btn-plum" style="width:100%;font-size:0.82rem;" onclick="readWholeStory()">▶ Read All Pages</button>
+    </div>
+    <div class="sep"></div>
+    <div>
+      <div class="r-section-title">💡 Tips</div>
+      <p style="font-size:0.75rem;color:#aaa;line-height:1.6;">Keep sentences short and positive. Use "I will..." or "First I will...". One idea per page works best.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div id="previewModal" class="modal-overlay preview-modal" style="display:none;">
+  <div class="modal" style="max-width:560px;padding:0;overflow:hidden;background:white;border-radius:24px;">
+    <div class="tts-bar">
+      <span>⭐ <strong id="previewTitle">Story</strong></span>
+      <button class="tts-btn" onclick="speakSlide()">🔊 Read Page</button>
+      <button class="tts-btn" onclick="readWholeStoryPreview()">▶ Read All</button>
+      <button class="tts-btn" onclick="closePreview()">✕ Close</button>
+    </div>
+    <div class="slideshow-page" id="slideshowPage"></div>
+    <div class="slideshow-controls">
+      <button class="slide-nav-btn" id="prevBtn" onclick="prevSlide()">◀</button>
+      <div class="slide-counter"><span id="slideNum">1</span> / <span id="slideTot">1</span></div>
+      <button class="slide-nav-btn" id="nextBtn" onclick="nextSlide()">▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY STORIES MODAL -->
+<div id="storiesModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <button class="modal-close" onclick="closeStoriesModal()">✕</button>
+    <h2>📚 My Stories</h2>
+    <div id="storiesModalList"></div>
+    <div style="margin-top:12px;">
+      <button class="btn btn-plum" onclick="closeStoriesModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let pages = [{ emoji: '😊', text: '', bg: '#FFD166', textColor: '#2d2d2d', photo: null }];
+let currentPage = 0;
+let currentSlide = 0;
+let savedStories = JSON.parse(localStorage.getItem('socialStories') || '[]');
+
+const BG_COLORS = ['#FFD166','#FF6B6B','#06D6A0','#C8A8E9','#7B2D8B','#74B3CE','#F4A261','#E9C46A','#fff','#f7f3ff','#e8f4fd','#2d2d2d'];
+const TEXT_COLORS = ['#2d2d2d','#ffffff','#7B2D8B','#FF6B6B','#06D6A0','#F4A261'];
+
+const EMOJIS = ['😊','😃','😄','😢','😴','😮','😡','🥰','😎','🤔',
+  '✂️','🏥','🛒','🏫','🦷','🚌','🌙','🍎','🎒','✏️',
+  '🐶','🐱','🌸','⭐','🎉','🎈','🏠','🚗','🍕','🧸',
+  '👩','👨','👧','👦','👴','👵','👩‍⚕️','👨‍🏫','🙏','👍'];
+
+const TEMPLATES = {
+  haircut: {
+    title: 'Getting a Haircut',
+    pages: [
+      { emoji:'✂️', text:'Today I am going to get my hair cut.' },
+      { emoji:'🚗', text:'First, I will travel to the hairdresser with Mum or Dad.' },
+      { emoji:'🪑', text:'I will wait in the waiting area. There might be other people there.' },
+      { emoji:'💺', text:'When it is my turn, I will sit in the special chair.' },
+      { emoji:'💧', text:'The hairdresser might wash my hair first. The water will be warm.' },
+      { emoji:'✂️', text:'The hairdresser will cut my hair with scissors. I need to sit still.' },
+      { emoji:'🪞', text:'I can look in the mirror to see my new haircut.' },
+      { emoji:'😊', text:'I did it! I got a haircut. I feel great!' }
+    ]
+  },
+  doctor: {
+    title: 'Going to the Doctor',
+    pages: [
+      { emoji:'🏥', text:'Today I am going to see the doctor.' },
+      { emoji:'🚗', text:'I will travel to the doctor\'s surgery with my family.' },
+      { emoji:'🪑', text:'I will wait in the waiting room. It might be busy.' },
+      { emoji:'👩‍⚕️', text:'The doctor will call my name when it is my turn.' },
+      { emoji:'👂', text:'The doctor will listen to my chest. It will not hurt.' },
+      { emoji:'💊', text:'The doctor might give me medicine to help me feel better.' },
+      { emoji:'😊', text:'Going to the doctor helps me stay healthy. I did well!' }
+    ]
+  },
+  shopping: {
+    title: 'Food Shopping',
+    pages: [
+      { emoji:'🛒', text:'Today we are going to the supermarket to buy food.' },
+      { emoji:'🚗', text:'We will drive to the supermarket together.' },
+      { emoji:'📝', text:'We have a list of things we need to buy.' },
+      { emoji:'🛒', text:'I can help push the trolley through the shop.' },
+      { emoji:'🍎', text:'We will put the food into the trolley as we go around.' },
+      { emoji:'💳', text:'At the end we pay for our food at the checkout.' },
+      { emoji:'😊', text:'We have all the food we need. Well done!' }
+    ]
+  },
+  school: {
+    title: 'First Day at School',
+    pages: [
+      { emoji:'🌅', text:'Today is my first day at my new school.' },
+      { emoji:'🎒', text:'I will pack my bag with everything I need.' },
+      { emoji:'🚌', text:'I will travel to school with Mum, Dad, or on the bus.' },
+      { emoji:'🏫', text:'When I arrive, my teacher will be there to welcome me.' },
+      { emoji:'🪑', text:'I will find my place and sit down in the classroom.' },
+      { emoji:'🤝', text:'I might meet some new friends today.' },
+      { emoji:'😊', text:'It is okay to feel a little nervous. My teacher will help me.' },
+      { emoji:'⭐', text:'I did it! I had a great first day at school!' }
+    ]
+  },
+  dentist: {
+    title: 'Visiting the Dentist',
+    pages: [
+      { emoji:'🦷', text:'Today I am going to visit the dentist to check my teeth.' },
+      { emoji:'🚗', text:'I will go to the dentist surgery with my family.' },
+      { emoji:'🪑', text:'I will wait in the waiting room until my name is called.' },
+      { emoji:'💺', text:'I will sit in the dentist chair. It can go up and down!' },
+      { emoji:'💡', text:'The dentist will shine a light to look at my teeth.' },
+      { emoji:'🪥', text:'The dentist will check each tooth is healthy and clean.' },
+      { emoji:'😊', text:'Looking after my teeth keeps them healthy. I was so brave!' }
+    ]
+  },
+  bus: {
+    title: 'Taking the Bus',
+    pages: [
+      { emoji:'🚌', text:'Today I am going to travel on the bus.' },
+      { emoji:'🛑', text:'I will wait at the bus stop. The bus will arrive soon.' },
+      { emoji:'💳', text:'I will need my bus pass or money for the fare.' },
+      { emoji:'🚌', text:'When the bus arrives I will wait for people to get off first.' },
+      { emoji:'🪑', text:'I will find a seat and sit down quietly.' },
+      { emoji:'🔇', text:'On the bus I will talk quietly and stay in my seat.' },
+      { emoji:'🛎️', text:'I will press the bell when my stop is coming up.' },
+      { emoji:'😊', text:'I travelled on the bus all by myself. I am so proud!' }
+    ]
+  },
+  bedtime: {
+    title: 'Bedtime Routine',
+    pages: [
+      { emoji:'🌙', text:'When the clock says bedtime, I start getting ready for sleep.' },
+      { emoji:'🛁', text:'First I have a bath or shower to get clean.' },
+      { emoji:'🪥', text:'Then I brush my teeth for two whole minutes.' },
+      { emoji:'👕', text:'I put on my comfortable pyjamas.' },
+      { emoji:'📖', text:'I can have one story or look at a book in bed.' },
+      { emoji:'💡', text:'The lights go off and the room gets dark and cosy.' },
+      { emoji:'😴', text:'I close my eyes and go to sleep. Good night!' }
+    ]
+  }
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  buildEmojiGrid();
+  buildColorPickers();
+  showHome();
+};
+
+function showHome() {
+  document.getElementById('homeScreen').style.display = 'flex';
+  document.getElementById('editorScreen').style.display = 'none';
+  renderSavedStoriesList();
+}
+
+function showEditor() {
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('editorScreen').style.display = 'flex';
+  renderPagesStrip();
+  loadPageIntoEditor(currentPage);
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+function newStory() {
+  pages = [{ emoji:'😊', text:'', bg:'#FFD166', textColor:'#2d2d2d', photo:null }];
+  currentPage = 0;
+  document.getElementById('storyTitle').value = 'My New Story';
+  showEditor();
+}
+
+function showTemplates() {
+  newStory();
+  switchTab(document.querySelector('.panel-tab'), 'templates');
+  showToast('Pick a template from the left panel! 📋');
+}
+
+function renderSavedStoriesList() {
+  const el = document.getElementById('savedStoriesList');
+  if (!savedStories.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="font-weight:800;color:#aaa;font-size:0.78rem;margin-bottom:10px;">RECENT STORIES</div>' +
+    savedStories.slice(-4).reverse().map((s,i) => `
+      <div class="story-card" onclick="loadSavedStory(${savedStories.length-1-i})">
+        <div class="story-card-icon">${s.pages[0]?.emoji || '📖'}</div>
+        <div class="story-card-info">
+          <div class="story-card-title">${s.title}</div>
+          <div class="story-card-meta">${s.pages.length} pages · ${s.date}</div>
+        </div>
+      </div>`).join('');
+}
+
+function loadSavedStory(i) {
+  const s = savedStories[i];
+  pages = s.pages;
+  currentPage = 0;
+  document.getElementById('storyTitle').value = s.title;
+  showEditor();
+}
+
+function showMyStories() {
+  const el = document.getElementById('storiesModalList');
+  if (!savedStories.length) {
+    el.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;">No saved stories yet.<br>Create one to get started! ✨</div>';
+  } else {
+    el.innerHTML = savedStories.map((s,i) => `
+      <div class="story-card" onclick="loadSavedStory(${i});closeStoriesModal()">
+        <div class="story-card-icon">${s.pages[0]?.emoji||'📖'}</div>
+        <div class="story-card-info">
+          <div class="story-card-title">${s.title}</div>
+          <div class="story-card-meta">${s.pages.length} pages · ${s.date}</div>
+        </div>
+        <button class="btn btn-sm btn-coral" onclick="event.stopPropagation();deleteStory(${i})" style="flex-shrink:0;">🗑</button>
+      </div>`).join('');
+  }
+  document.getElementById('storiesModal').style.display = 'flex';
+}
+
+function closeStoriesModal() { document.getElementById('storiesModal').style.display = 'none'; }
+
+function deleteStory(i) {
+  savedStories.splice(i,1);
+  localStorage.setItem('socialStories', JSON.stringify(savedStories));
+  showMyStories();
+  renderSavedStoriesList();
+}
+
+// ─── TEMPLATES ────────────────────────────────────────────────────────────────
+function loadTemplate(key) {
+  const t = TEMPLATES[key];
+  const colors = ['#FFD166','#C8A8E9','#74B3CE','#06D6A0','#FF6B6B','#F4A261','#E9C46A','#e8f4fd'];
+  pages = t.pages.map((p,i) => ({
+    emoji: p.emoji, text: p.text,
+    bg: colors[i % colors.length],
+    textColor: '#2d2d2d', photo: null
+  }));
+  document.getElementById('storyTitle').value = t.title;
+  currentPage = 0;
+  showEditor();
+  showToast('Template loaded! ✨ Customise it to make it your own.');
+}
+
+// ─── PAGE MANAGEMENT ──────────────────────────────────────────────────────────
+function addPage() {
+  updateCurrentPage();
+  pages.push({ emoji:'😊', text:'', bg:'#FFD166', textColor:'#2d2d2d', photo:null });
+  currentPage = pages.length - 1;
+  renderPagesStrip();
+  loadPageIntoEditor(currentPage);
+}
+
+function deleteCurrentPage() {
+  if (pages.length === 1) { showToast('A story needs at least one page!'); return; }
+  pages.splice(currentPage, 1);
+  currentPage = Math.min(currentPage, pages.length - 1);
+  renderPagesStrip();
+  loadPageIntoEditor(currentPage);
+}
+
+function selectPage(i) {
+  updateCurrentPage();
+  currentPage = i;
+  renderPagesStrip();
+  loadPageIntoEditor(i);
+}
+
+function updateCurrentPage() {
+  if (!pages[currentPage]) return;
+  pages[currentPage].text = document.getElementById('pageText').value;
+  document.getElementById('infoTitle').textContent = document.getElementById('storyTitle').value;
+  document.getElementById('infoPages').textContent = pages.length;
+  renderPagesStrip();
+}
+
+function loadPageIntoEditor(i) {
+  const p = pages[i];
+  const area = document.getElementById('pageImageArea');
+  const emojiEl = document.getElementById('pageEmoji');
+  if (p.photo) {
+    area.style.background = '#eee';
+    emojiEl.style.display = 'none';
+    let img = area.querySelector('img.page-photo');
+    if (!img) { img = document.createElement('img'); img.className='page-photo'; img.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0;'; area.insertBefore(img, area.firstChild); }
+    img.src = p.photo;
+  } else {
+    area.style.background = p.bg || '#FFD166';
+    emojiEl.style.display = '';
+    emojiEl.textContent = p.emoji || '😊';
+    const img = area.querySelector('img.page-photo');
+    if (img) img.remove();
+  }
+  document.getElementById('pageText').value = p.text || '';
+  document.getElementById('pageText').style.fontSize = (p.fontSize || 18) + 'px';
+  document.getElementById('pageText').style.color = p.textColor || '#2d2d2d';
+  document.getElementById('storyPage').style.background = '#fff';
+  document.getElementById('pageBgPreview').style.background = p.bg || '#FFD166';
+  document.getElementById('fontSizeSlider').value = p.fontSize || 18;
+  document.getElementById('fontSizeVal').textContent = p.fontSize || 18;
+  document.getElementById('infoPages').textContent = pages.length;
+  document.getElementById('infoTitle').textContent = document.getElementById('storyTitle').value;
+}
+
+function renderPagesStrip() {
+  const strip = document.getElementById('pagesStrip');
+  strip.innerHTML = '';
+  pages.forEach((p,i) => {
+    const div = document.createElement('div');
+    div.className = 'page-thumb' + (i===currentPage?' active':'');
+    div.onclick = () => selectPage(i);
+    div.innerHTML = `<div class="page-num">${i+1}</div>`;
+    if (p.photo) {
+      div.style.background = '#eee';
+      const img = document.createElement('img');
+      img.src = p.photo;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:9px;';
+      div.appendChild(img);
+    } else {
+      div.style.background = p.bg || '#FFD166';
+      div.innerHTML += `<div class="thumb-bg">${p.emoji||'😊'}</div>`;
+    }
+    const label = document.createElement('div');
+    label.className = 'thumb-label';
+    label.textContent = p.text ? p.text.substring(0,18)+'…' : 'Empty page';
+    div.appendChild(label);
+    strip.appendChild(div);
+  });
+  const addBtn = document.createElement('div');
+  addBtn.className = 'add-page-btn';
+  addBtn.innerHTML = '+<div style="font-size:0.65rem;font-weight:800;margin-top:2px;">Page</div>';
+  addBtn.onclick = addPage;
+  strip.appendChild(addBtn);
+}
+
+// ─── PHOTO ────────────────────────────────────────────────────────────────────
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pages[currentPage].photo = ev.target.result;
+    loadPageIntoEditor(currentPage);
+    renderPagesStrip();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+// ─── EMOJI ────────────────────────────────────────────────────────────────────
+function buildEmojiGrid() {
+  const grid = document.getElementById('emojiGrid');
+  EMOJIS.forEach(em => {
+    const btn = document.createElement('div');
+    btn.className = 'emoji-btn';
+    btn.textContent = em;
+    btn.onclick = () => {
+      pages[currentPage].emoji = em;
+      pages[currentPage].photo = null;
+      const img = document.getElementById('pageImageArea').querySelector('img.page-photo');
+      if (img) img.remove();
+      document.getElementById('pageEmoji').style.display = '';
+      document.getElementById('pageEmoji').textContent = em;
+      document.getElementById('pageImageArea').style.background = pages[currentPage].bg || '#FFD166';
+      renderPagesStrip();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ─── COLORS ───────────────────────────────────────────────────────────────────
+function buildColorPickers() {
+  const picker = document.getElementById('colorPicker');
+  BG_COLORS.forEach(c => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot';
+    dot.style.background = c;
+    if (c==='#fff'||c==='#f7f3ff'||c==='#e8f4fd') dot.style.border='2px solid #ddd';
+    dot.onclick = () => {
+      pages[currentPage].bg = c;
+      document.getElementById('pageBgPreview').style.background = c;
+      document.getElementById('pageImageArea').style.background = c;
+      picker.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));
+      dot.classList.add('selected');
+      renderPagesStrip();
+    };
+    picker.appendChild(dot);
+  });
+  const tpicker = document.getElementById('textColorPicker');
+  TEXT_COLORS.forEach(c => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot';
+    dot.style.background = c;
+    if (c==='#fff') dot.style.border='2px solid #ddd';
+    dot.onclick = () => {
+      pages[currentPage].textColor = c;
+      document.getElementById('pageText').style.color = c;
+      tpicker.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));
+      dot.classList.add('selected');
+    };
+    tpicker.appendChild(dot);
+  });
+}
+
+// ─── FONT SIZE ────────────────────────────────────────────────────────────────
+function changeFontSize(v) {
+  document.getElementById('pageText').style.fontSize = v+'px';
+  document.getElementById('fontSizeVal').textContent = v;
+  pages[currentPage].fontSize = parseInt(v);
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(el, tab) {
+  document.querySelectorAll('.panel-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabTemplates').style.display = tab==='templates'?'block':'none';
+  document.getElementById('tabImages').style.display = tab==='images'?'block':'none';
+  document.getElementById('tabColors').style.display = tab==='colors'?'block':'none';
+}
+
+// ─── SAVE ─────────────────────────────────────────────────────────────────────
+function saveStory() {
+  updateCurrentPage();
+  const title = document.getElementById('storyTitle').value || 'Untitled Story';
+  const story = {
+    title,
+    pages: JSON.parse(JSON.stringify(pages)),
+    date: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})
+  };
+  savedStories.push(story);
+  try { localStorage.setItem('socialStories', JSON.stringify(savedStories)); } catch(e) {}
+  showToast('Story saved! ⭐');
+  renderSavedStoriesList();
+}
+
+// ─── PREVIEW / SLIDESHOW ──────────────────────────────────────────────────────
+function openPreview() {
+  updateCurrentPage();
+  currentSlide = currentPage;
+  document.getElementById('previewTitle').textContent = document.getElementById('storyTitle').value;
+  document.getElementById('previewModal').style.display = 'flex';
+  renderSlide();
+}
+
+function closePreview() { document.getElementById('previewModal').style.display = 'none'; window.speechSynthesis && window.speechSynthesis.cancel(); }
+
+function renderSlide() {
+  const p = pages[currentSlide];
+  const area = document.getElementById('slideshowPage');
+  area.style.background = p.bg || '#FFD166';
+  let imgHtml = '';
+  if (p.photo) {
+    imgHtml = `<img src="${p.photo}" style="max-height:220px;max-width:100%;border-radius:16px;object-fit:cover;box-shadow:0 6px 20px rgba(0,0,0,0.15);">`;
+  } else {
+    imgHtml = `<div style="font-size:7rem;line-height:1;">${p.emoji||'😊'}</div>`;
+  }
+  area.innerHTML = `${imgHtml}<div class="slideshow-text" style="color:${p.textColor||'#2d2d2d'};font-size:${(p.fontSize||18)+4}px;">${p.text||'...'}</div>`;
+  document.getElementById('slideNum').textContent = currentSlide+1;
+  document.getElementById('slideTot').textContent = pages.length;
+  document.getElementById('prevBtn').disabled = currentSlide===0;
+  document.getElementById('nextBtn').disabled = currentSlide===pages.length-1;
+}
+
+function prevSlide() { if(currentSlide>0){currentSlide--;renderSlide();} }
+function nextSlide() { if(currentSlide<pages.length-1){currentSlide++;renderSlide();} }
+
+// ─── TTS ──────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!window.speechSynthesis) { showToast('Speech not supported in this browser'); return; }
+  window.speechSynthesis.cancel();
+  if (!text) return;
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.85; utt.pitch = 1.1;
+  window.speechSynthesis.speak(utt);
+}
+
+function speakCurrentPage() { speak(pages[currentPage].text || 'This page has no text yet.'); }
+function speakSlide() { speak(pages[currentSlide].text || 'This page has no text.'); }
+
+function readWholeStory() {
+  const allText = pages.map((p,i) => `Page ${i+1}. ${p.text}`).join('. ');
+  speak(allText);
+}
+
+function readWholeStoryPreview() {
+  let i = 0;
+  function next() {
+    if (i >= pages.length) return;
+    currentSlide = i;
+    renderSlide();
+    const utt = new SpeechSynthesisUtterance(pages[i].text || 'No text');
+    utt.rate = 0.85; utt.pitch = 1.1;
+    utt.onend = () => { i++; setTimeout(next, 600); };
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utt);
+    i++;
+  }
+  // restart
+  i = 0; currentSlide = 0; renderSlide();
+  window.speechSynthesis.cancel();
+  let j = 0;
+  function playAll() {
+    if (j >= pages.length) return;
+    currentSlide = j; renderSlide();
+    const utt = new SpeechSynthesisUtterance(pages[j].text || 'No text');
+    utt.rate = 0.85; utt.pitch = 1.1;
+    utt.onend = () => { j++; setTimeout(playAll, 700); };
+    window.speechSynthesis.speak(utt);
+    j++;
+  }
+  // avoid double increment
+  window.speechSynthesis.cancel();
+  let idx = 0;
+  (function readNext() {
+    if (idx >= pages.length) return;
+    currentSlide = idx; renderSlide();
+    const utt = new SpeechSynthesisUtterance(pages[idx].text || 'This page has no text.');
+    utt.rate = 0.85; utt.pitch = 1.1;
+    utt.onend = () => { idx++; setTimeout(readNext, 700); };
+    window.speechSynthesis.speak(utt);
+    idx++;
+  })();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+</script>
+</body>
+</html>
