@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Story Star — Social Story Maker</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --sky: #e8f4fd;
@@ -450,6 +451,7 @@
     <button class="btn btn-ghost" onclick="showHome()">🏠 Home</button>
     <button class="btn btn-sun" onclick="openPreview()">▶ Preview</button>
     <button class="btn btn-mint" onclick="saveStory()">💾 Save</button>
+    <button class="btn btn-coral" onclick="exportPDF()">📄 Export PDF</button>
   </div>
 </header>
 
@@ -1122,6 +1124,104 @@ function readWholeStoryPreview() {
     window.speechSynthesis.speak(utt);
     idx++;
   })();
+}
+
+// ─── PDF EXPORT ───────────────────────────────────────────────────────────────
+async function exportPDF() {
+  updateCurrentPage();
+  const { jsPDF } = window.jspdf;
+  const title = document.getElementById('storyTitle').value || 'My Story';
+
+  showToast('Building your PDF… ⏳');
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a5' });
+  const PW = doc.internal.pageSize.getWidth();   // 210mm (A5 landscape width)
+  const PH = doc.internal.pageSize.getHeight();  // 148mm
+
+  // Helper: hex to r,g,b
+  function hexToRgb(hex) {
+    hex = hex.replace('#','');
+    if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+    const n = parseInt(hex, 16);
+    return [(n>>16)&255, (n>>8)&255, n&255];
+  }
+
+  // Helper: draw rounded rect
+  function roundedRect(doc, x, y, w, h, r) {
+    doc.roundedRect(x, y, w, h, r, r, 'F');
+  }
+
+  for (let i = 0; i < pages.length; i++) {
+    if (i > 0) doc.addPage();
+    const p = pages[i];
+
+    // Background
+    const bg = hexToRgb(p.bg || '#FFD166');
+    doc.setFillColor(...bg);
+    doc.rect(0, 0, PW, PH, 'F');
+
+    // White card
+    doc.setFillColor(255, 255, 255);
+    roundedRect(doc, 8, 8, PW - 16, PH - 16, 6);
+
+    // Image area background
+    const imgAreaH = PH * 0.52;
+    doc.setFillColor(...bg);
+    roundedRect(doc, 10, 10, PW - 20, imgAreaH - 4, 4);
+
+    // Photo or emoji
+    if (p.photo) {
+      try {
+        // Determine image type
+        const mime = p.photo.split(';')[0].split(':')[1];
+        const fmt = mime.includes('png') ? 'PNG' : 'JPEG';
+        // Fit image into image area with padding
+        const iw = PW - 28, ih = imgAreaH - 12;
+        doc.addImage(p.photo, fmt, 14, 14, iw, ih, '', 'FAST');
+      } catch(e) {
+        // fallback: just show bg
+      }
+    } else {
+      // Draw emoji as large text centred in image area
+      const em = p.emoji || '😊';
+      doc.setFontSize(52);
+      const emX = PW / 2;
+      const emY = 10 + (imgAreaH - 4) / 2 + 10;
+      doc.text(em, emX, emY, { align: 'center', baseline: 'middle' });
+    }
+
+    // Page number badge
+    doc.setFillColor(...hexToRgb('#7B2D8B'));
+    doc.circle(16, 16, 5, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text(String(i + 1), 16, 16, { align: 'center', baseline: 'middle' });
+
+    // Story text
+    const textY = 10 + imgAreaH + 2;
+    const textAreaH = PH - textY - 14;
+    const textColor = hexToRgb(p.textColor || '#2d2d2d');
+    doc.setTextColor(...textColor);
+    doc.setFontSize(p.fontSize ? Math.min(p.fontSize * 0.72, 15) : 13);
+    doc.setFont('helvetica', 'bold');
+    const lines = doc.splitTextToSize(p.text || '', PW - 28);
+    const lineH = (p.fontSize ? Math.min(p.fontSize * 0.72, 15) : 13) * 0.45;
+    const blockH = lines.length * lineH * 1.4;
+    const startY = textY + (textAreaH - blockH) / 2 + lineH;
+    doc.text(lines, PW / 2, startY, { align: 'center', lineHeightFactor: 1.4 });
+
+    // Title on first page footer
+    if (i === 0) {
+      doc.setFontSize(7);
+      doc.setTextColor(180, 180, 180);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`⭐ ${title}`, PW - 12, PH - 4, { align: 'right' });
+    }
+  }
+
+  doc.save(`${title.replace(/\s+/g,'-')}.pdf`);
+  showToast('PDF downloaded! 📄');
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
